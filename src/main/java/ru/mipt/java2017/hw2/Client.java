@@ -64,7 +64,7 @@ public class Client {
 
   private void sendSegmentToServer(final ManagedChannel channel,
       final ComputatorGrpc.ComputatorFutureStub futureStub, final Long a, final Long b) {
-    logger.info("Will try to send segment {}, {} ... ", a, b);
+    logger.debug("Will try to send segment {}, {} ... ", a, b);
     SegmentRequest request = SegmentRequest.newBuilder()
         .setLeft(a)
         .setRight(b)
@@ -82,7 +82,7 @@ public class Client {
             if (result == null) {
               logger.warn("result " + a + " " + b + " can't come");
             } else {
-              logger.info("Get sum from {} to {}", a, b);
+              logger.debug("Get sum from {} to {}", a, b);
               lockSum.lock();
               fullSum += result.getResultSum();
               jobs.remove(new Pair<>(a, b));
@@ -154,11 +154,13 @@ public class Client {
     long start = Long.parseLong(args[0]);
     long end = Long.parseLong(args[1]) + 1;
 
+    logger.debug("" + start + " " + end);
+
     LinkedList<Pair<String, Integer> > hosts = new LinkedList<>();
     for (int i = 2; i < args.length; i += 2) {
       String hostName = args[i];
       int portNumber = Integer.parseInt(args[i + 1]);
-      logger.info("new host " + hostName + " " + portNumber);
+      logger.debug("new host " + hostName + " " + portNumber);
       hosts.addLast(new Pair<>(hostName, portNumber));
     }
     Client client = new Client(hosts, true);
@@ -171,8 +173,8 @@ public class Client {
       }
     }
     client.shutdown();
-    logger.info("resultSum = " + client.fullSum);
-    logger.info("Time: " + (System.currentTimeMillis() - timeBegin) + "");
+    logger.debug("resultSum = " + client.fullSum);
+    logger.debug("Time: " + (System.currentTimeMillis() - timeBegin) + "");
     System.out.println(client.fullSum);
   }
 }

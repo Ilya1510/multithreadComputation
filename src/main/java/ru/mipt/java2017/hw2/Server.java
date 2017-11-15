@@ -30,15 +30,15 @@ public class Server {
         .addService(new ComputatorImpl())
         .build()
         .start();
-    logger.info("Server started, listening on " + portNumber);
+    logger.debug("Server started, listening on " + portNumber);
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
         // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-        System.err.println("*** shutting down gRPC server since JVM is shutting down");
+        logger.warn("*** shutting down gRPC server since JVM is shutting down");
         Server.this.stop();
-        System.err.println("*** server shut down");
+        logger.warn("*** server shut down");
       }
     });
   }
@@ -83,7 +83,7 @@ public class Server {
       for (int i = 0; i < d; ++i) {
         Future<Boolean> promise = promises.get(i);
         if (promise.get()) {
-          logger.info("Number {} is prime!", a + i);
+          logger.debug("Number {} is prime!", a + i);
           sum += a + i;
         }
       }
@@ -93,11 +93,12 @@ public class Server {
     @Override
     public void compute(SegmentRequest req, StreamObserver<SumReply> responseObserver) {
       try {
-        logger.info("Got request from client: {}, {}", req.getLeft(), req.getRight());
+        logger.debug("Got request from client: {}, {}", req.getLeft(), req.getRight());
         SumReply reply = SumReply.newBuilder().setResultSum(getSumOfPrimeNumbers(
             req.getLeft(), req.getRight())).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
+        logger.debug("Sent sum to client: {}", reply.getResultSum());
       } catch (ExecutionException | InterruptedException e) {
         server.shutdown();
       }
